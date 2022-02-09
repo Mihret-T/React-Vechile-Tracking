@@ -1,0 +1,11 @@
+
+.Login-form {
+    margin-top: 15%;
+    width : 60%;
+    margin-left: 20%;
+    /* background-color: red; */
+}
+
+#email, #password {
+    margin-top: 10px;
+}

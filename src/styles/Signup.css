@@ -1,0 +1,18 @@
+
+.Signup-form {
+    margin-top: 5%;
+    width : 60%;
+    margin-left: 20%;
+}
+
+.form-inputs {
+    width: 400px;
+    margin-left: 10%;
+}
+
+
+
+#displayName, #email, #password, #password-confirm {
+    margin-top: 10px;
+}
+

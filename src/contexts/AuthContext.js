@@ -8,7 +8,7 @@ import {
   sendPasswordResetEmail,
   createUserDocument
 } from "firebase/auth";
-import { addDoc, getDoc, getDocs, collection, doc, setDoc, onSnapshot, QuerySnapshot, query } from "firebase/firestore";
+import { addDoc, getDoc, getDocs, collection, doc, setDoc, onSnapshot, QuerySnapshot, query, where } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
 export const AuthContext = createContext();
@@ -82,6 +82,9 @@ function getUsers(){
   return getDocs(collection(db, 'Users'));
 }
 
+function updateLocation(){
+  return getDocs(collection(db, "Location"))
+}
 // function updateEmail(email) {
 //   return currentUser.updateEmail(email)
 // }
@@ -140,7 +143,8 @@ const value = {
   logout,
   registerUser,
   getUsers,
-  getUser
+  getUser,
+  updateLocation
   // resetPassword,
   // updateEmail,
   // updatePassword

@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Form, Button, Card, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
+import '../styles/Login.css';
 
 export default function Login() {
     const emailRef = useRef()
@@ -23,12 +24,10 @@ export default function Login() {
             const user = doc.data();
             setUser(user);
             if(user.isAdmin){
-                navigate('/admin-dashboard')
+                navigate(`/admin-dashboard/${user.id}`)
             }else{
-                navigate('/dashboard')
+                navigate(`/dashboard/${user.id}`)
             }
-            console.log(user); 
-            
         } catch (error) {
             console.log(error)
             setError("Failed to log in")
@@ -38,7 +37,7 @@ export default function Login() {
 
     return (
         <>
-            <Card>
+            <Card className="Login-form">
                 <Card.Body>
                     <h2 className="text-center mb-4">Log In</h2>
                     {error && <Alert variant="danger">{error}</Alert>}
@@ -51,7 +50,7 @@ export default function Login() {
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="password" ref={passwordRef} required />
                         </Form.Group>
-                        <Button disabled={loading} className="w-100" type="submit">
+                        <Button style={{marginTop: "30px"}} disabled={loading} className="w-100" type="submit">
                             Log In
                         </Button>
                     </Form>

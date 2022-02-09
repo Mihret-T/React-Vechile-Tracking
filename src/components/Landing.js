@@ -1,38 +1,41 @@
 import React from 'react';
-import { Container, Row, Button } from 'react-bootstrap'
+import { Card, Container, Row, Button} from 'react-bootstrap'
 import { Link } from "react-router-dom"
 import '../styles/LandingStyles.css';
+import logo from '../assets/logo1.png'
 
 export default function Landing() {
   return (
-    
-    <div className="main">
-      <Container>
-        <Row>
-          <div className="intro-text">
+        <Container className="d-flex align-items-center justify-content-center">
+          <Row className="justify-content-md-center">
             <div>
-              <h1 className="style.title">Welcome to Vechile Tracking App</h1>
-              <p className="style.subtitle">One Safe place for all your notes.</p>
+              <Card style={{ width: '40rem', }}>
+                <Card.Img variant="top" src={logo} />
+                <Card.Body className="intro-text">
+                  <Card.Title><h2>Welcome to Vechile Tracking App</h2></Card.Title>
+                  <Card.Text className="subtitle">
+                    One Safe place to track all your drivers.
+                  </Card.Text>
+                  <div className="buttonContainer">
+                    <Link to="/login">
+                      <Button size="lg">
+                        Login
+                      </Button>
+                    </Link>
+                    <Link to="/signup">
+                      <Button
+                        variant="outline-primary"
+                        size="lg"
+                        style={{float: 'right'}}>
+                        Signup
+                      </Button>
+                    </Link>
+                  </div>
+
+                </Card.Body>
+              </Card>
             </div>
-            <div className="buttonContainer">
-              <Link to="/login">
-                <Button size="lg" className="landingbutton">
-                  Login
-                </Button>
-              </Link>
-              <Link to="/signup">
-                <Button
-                  variant="outline-primary"
-                  size="lg"
-                  className="landingbutton">
-                  Signup
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </Row>
-       
-      </Container>
-    </div>
+          </Row>
+        </Container>
   );
 }

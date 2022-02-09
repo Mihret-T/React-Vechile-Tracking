@@ -1,20 +1,29 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap'
+import { Container, Row, Col, Card, Button } from 'react-bootstrap'
 import '../styles/DashboardStyles.css';
-import { useState, setState } from 'react';
-import ReactMapGL from 'react-map-gl';
+import ReactMapGL, { Marker } from 'react-map-gl';
+import profilePic from '../profilePic1.png';
+import { getDoc, doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import { useParams, Link } from 'react-router-dom';
+import pin from '../redPin.jpg';
 
-var options = {
-  enableHighAccuracy: true,
-  timeout: 5000,
-  maximumAge: 0,
-};
+// var options = {
+//   enableHighAccuracy: true,
+//   timeout: 5000,
+//   maximumAge: 0,
+// };
 
-export default class Dashboard extends Component {
+export class UserProfile extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
       MAPBOX_TOKEN: "pk.eyJ1IjoibWlocmV0IiwiYSI6ImNrejdldHp5djAzbGkyd3Jwa2Y1MHhuazEifQ.G5TBQJsZ8rDPRfpxqdp3Cw",
+      loading: false,
+      error: '',
+      userId: props.userId,
+      user: {},
       viewport: {
         width: 1000,
         height: 800,
@@ -23,47 +32,170 @@ export default class Dashboard extends Component {
         zoom: 10,
       },
     };
+  }
 
-    // updateViewport = (position) => {
-    //   const newViewport = {
-    //     width: 1000,
-    //     height: 800,
-    //     latitude: position.coords.latitude,
-    //     longitude: position.coords.longitude,
-    //     zoom: 15,
-    //   }
-    //   this.setState({viewport: newViewport})
-    // }
-   // this.updateViewport = this.updateViewport.bind(this);
-  };
+  async componentDidMount() {
+    try {
+      this.setState({ loading: true });
+      const doc = await this.getUserData();
+      this.setState({ user: doc.data() });
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition((position) => {
+          console.log("Latitude is :", position.coords.latitude);
+          console.log("Longitude is :", position.coords.longitude);
+          const newViewport = {
+            width: 1000,
+            height: 800,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            zoom: 15,
+          }
+          this.setState({ viewport: newViewport });
+          const location = {
+            userId: this.state.userId,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          }
+          const result = this.setUserLocation(location);
+          // if(result.data){
+          //   await this.updateUserLocation(location);
+          // }else{
+          //   await this.setUserLocation(location)
+          // }
+          // const result = this.updateUserlocation(location);
+          console.log(result);
+        }, (error) => alert(error.message), { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 })
+      }
+      console.log(this.state)
+    } catch {
+      this.setState({ error: 'Failed to retrive user datas' })
+    }
+    this.setState({ loading: false });
+  }
+
+  async getUserData() {
+    return await getDoc(doc(db, "Users", this.state.userId));
+  }
+
+  async setUserLocation(data) {
+    return await setDoc(doc(db, 'Location', this.state.userId), data);
+  }
+
+  // async updateUserLocation(data){
+  //   const result = await getDoc(doc(db, "Location", this.state.userId));
+  //   console.log(result);
+  //   // return await setDoc(doc(db, "Location"), data)
+  // }
+  // async getUserPreviousLocation(){
+  //   return await getDoc(doc(db, "Location", this.state.userId));
+  // }
+
+  // this.state = {
+  //   MAPBOX_TOKEN: "pk.eyJ1IjoibWlocmV0IiwiYSI6ImNrejdldHp5djAzbGkyd3Jwa2Y1MHhuazEifQ.G5TBQJsZ8rDPRfpxqdp3Cw",
+  //   latitude: 9.036000,
+  //   longitude: 38.752300,
+  // }
+  //this.updatelocation = this.updatelocation.bind(this);
+
+  // constructor(props) {
+  //   super(props);
+  //   this.state = {
+  //     MAPBOX_TOKEN: "pk.eyJ1IjoibWlocmV0IiwiYSI6ImNrejdldHp5djAzbGkyd3Jwa2Y1MHhuazEifQ.G5TBQJsZ8rDPRfpxqdp3Cw",
+  //     viewport: {
+  //       width: 1000,
+  //       height: 800,
+  //       latitude: 9.036000,
+  //       longitude: 38.752300,
+  //       zoom: 10,
+  //     },
+  //   };
+
+  //   this.updateViewport = this.updateViewport.bind(this);
+  // }
+
+  // updateViewport = (postion) => {
+  //   const { viewport } = this.state.viewport;
+  //   viewport.latitude = 9.005401;
+  //   viewport.longitude = 38.763611;
+  //   this.setState({ viewport });
+
+  //   // this.setState(state => {
+  //   //   let viewport = Object.assign({}, state.viewport);
+  //   //   viewport.latitude = position.coords.latitude,
+  //   //   viewpoert.longitude = position.coords.longitude,
+  //   //   viewport.zoom =  15;
+  //   // return { viewport};
+  //   // })
+  // }
+
+  // constructor(props) {
+  //   super(props);
+
+  //   this.setViewport = this.setViewport.bind(this);
+  //   }
+
+  //   setViewport = () => {
+
+  //     const newViewport = {
+  //           width: 1000,
+  //           height: 800,
+  //           latitude: 9.005401,
+  //           longitude: 38.763611,
+  //           zoom: 15,
+  //         }
+  //     this.setState({viewport: newViewport})
+
+  //   // updateViewport = (position) => {
+  //   //   const newViewport = {
+  //   //     width: 1000,
+  //   //     height: 800,
+  //   //     latitude: position.coords.latitude,
+  //   //     longitude: position.coords.longitude,
+  //   //     zoom: 15,
+  //   //   }
+  //   //   this.setState({viewport: newViewport})
+  //   // }
+  //  // this.updateViewport = this.updateViewport.bind(this);
+  // };
+
+  // state = {
+  //   MAPBOX_TOKEN: "pk.eyJ1IjoibWlocmV0IiwiYSI6ImNrejdldHp5djAzbGkyd3Jwa2Y1MHhuazEifQ.G5TBQJsZ8rDPRfpxqdp3Cw",
+  //   viewport: {
+  //     width: 1000,
+  //     height: 800,
+  //     latitude: 9.036000,
+  //     longitude: 38.752300,
+  //     zoom: 10,
+  //   },
+  // };
 
   // updateViewport = (position) => {
-    
+
   //   this.setState((state, props) => {
   //     viewport:newViewport
   //   });
   // }
 
-  success(pos) {
-    console.log("success function");
-    console.log(pos);
-    var crd = pos.coords;
-    console.log("Your current position is:");
-    console.log(`Latitude : ${crd.latitude}`);
-    console.log(`Longitude: ${crd.longitude}`);
-    console.log(`More or less ${crd.accuracy} meters.`);
-    this.setState({viewport: {
-      width: 1000,
-          height: 800,
-          latitude: crd.latitude,
-          longitude: crd.longitude,
-          zoom: 15,
-    }}); 
-  }
+  // success(pos) {
+  //   console.log("success function");
+  //   console.log(pos);
+  //   var crd = pos.coords;
+  //   console.log("Your current position is:");
+  //   console.log(`Latitude : ${crd.latitude}`);
+  //   console.log(`Longitude: ${crd.longitude}`);
+  //   console.log(`More or less ${crd.accuracy} meters.`);
+  //   this.setState({viewport: {
+  //     width: 1000,
+  //         height: 800,
+  //         latitude: crd.latitude,
+  //         longitude: crd.longitude,
+  //         zoom: 15,
+  //   }}); 
+  // }
 
-  errors(err) {
-    console.warn(`ERROR(${err.code}): ${err.message}`);
-  }
+  // errors(err) {
+  //   console.warn(`ERROR(${err.code}): ${err.message}`);
+  // }
 
   // componentDidMount() {
   //   if (navigator.geolocation) {
@@ -85,30 +217,57 @@ export default class Dashboard extends Component {
   //   }
   // };
 
-  
-  componentDidMount() {
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(function (position) {
-        console.log("Latitude is :", position.coords.latitude);
-        console.log("Longitude is :", position.coords.longitude);
-        const newViewport = {
-          width: 1000,
-          height: 800,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          zoom: 15,
-        }
-        console.log(newViewport);
-        // this.updateViewport(newVi);
-      
-        this.setState({ viewport: newViewport })
-      });
-    }
-  }
+  // console.log(this.state.latitude);
+  // console.log(this.state.longitude)
+  // const currentLatitude = position.coords.latitude;
+  // this.setState({ latitude: currentLatitude });
+  // const currentLongitude = position.coords.longitude;
+  // this.setState({ longitude: currentLongitude });
 
- 
+  // componentDidMount() {
+  //   try {
+
+  //     if (navigator.geolocation) {
+  //       navigator.geolocation.watchPosition((position) => {
+  //         console.log("Latitude is :", position.coords.latitude);
+  //         console.log("Longitude is :", position.coords.longitude);
+
+  //         const newViewport = {
+  //           width: 1000,
+  //           height: 800,
+  //           latitude: position.coords.latitude,
+  //           longitude: position.coords.longitude,
+  //           zoom: 15,
+  //         }
+
+  //         this.setState({ viewport: newViewport });
+  //         const result = this.updatePosition();
+  //         console.log(result);
+  //       }, (error) => alert(error.message), { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 })
+  //     }
+
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+
+  // }
+
+  // this.setState(prevState => {
+  //   let viewport = Object.assign({}, prevState.viewport);
+  //   viewport.latitude = position.coords.latitude;
+  //     viewport.longitude = position.coords.longitude;
+  //     viewport.zoom = 15;
+  //   return { viewport };
+  // });
+
+  // const { viewport } = this.state.viewport;
+  // viewport.latitude = position.coords.latitude;
+  // viewport.longitude = position.coords.longitude;
+  // this.setState({ viewport });
+
+  //this.updateViewport(position);
+
   // // // const  mapStyle= "style: 'mapbox://styles/mapbox/streets-v11'";
-
   // const [viewport, setViewport] = useState({
   //     width: 1000,
   //     height: 800,
@@ -116,9 +275,6 @@ export default class Dashboard extends Component {
   //     longitude: 38.752300,
   //     zoom: 10,
   //   });
-
-
-
   // function getLocation() {
   //   if (navigator.geolocation) {
   //     navigator.permissions
@@ -148,40 +304,59 @@ export default class Dashboard extends Component {
 
   render() {
     return (
-      <Container fluid className="w-100">
+      <Container fluid>
         <Row>
-          <Col sm={3} className="profile">
+          <Col sm={4}>
             <Card>
-              {/* <Card.Img variant="top" src="holder.js/100px180" /> */}
+              <Card.Img variant="top" src={profilePic} />
               <Card.Body>
-                <Card.Title>Profile</Card.Title>
+                <Card.Title>{this.state.user.name}</Card.Title>
                 <Card.Text>
-                  Some quick example text to build on the card title and make up the bulk of
-                  the card's content.
+                  <strong>Email: </strong> {this.state.user.email}
                 </Card.Text>
-                <ListGroup variant="flush">
-                  <ListGroup.Item>Cras justo odio</ListGroup.Item>
-                  <ListGroup.Item>Dapibus ac facilisis in</ListGroup.Item>
-                  <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
-                </ListGroup>
-                <Button variant="primary">Update Profile</Button>
-                {/* <Button onClick={getLocation} className="w-100">Get location</Button> */}
+                <Card.Text>
+                  <strong> Phone Number: </strong> {this.state.user.phoneNo}
+                </Card.Text>
+                <Card.Text>
+                  <strong> Role: </strong> Driver
+                </Card.Text>
+                <Link to="/login">
+                  <Button style={{ marginBottom: "20px" }} className="w-100" variant="danger" >Logout</Button>
+                </Link>
               </Card.Body>
             </Card>
           </Col>
-          <Col sm={9} className="map">
+          <Col sm={8}>
+            <h2>My Location</h2>
+            <p>Latitude: {this.state.viewport.latitude}</p>
+            <p>Longitude: {this.state.viewport.longitude}</p>
             <ReactMapGL
               {...this.state.viewport}
               onViewportChange={nextViewport => this.setState({ viewport: nextViewport })}
               mapboxApiAccessToken={this.state.MAPBOX_TOKEN}
+              mapStyle="mapbox://styles/mapbox/streets-v9"
             >
+              <Marker longitude={this.state.viewport.longitude} latitude={this.state.viewport.latitude} draggable={true} anchor="top" >
+                {/* <h1>here</h1> */}
+                <img src={pin} />
+              </Marker>
             </ReactMapGL>
+
           </Col>
         </Row>
       </Container>
       // mapStyle={mapStyle}
     )
-
   }
 
+}
+
+export default function Dashboard() {
+  let { id } = useParams();
+
+  return (
+    <div>
+      <UserProfile userId={id}></UserProfile>
+    </div>
+  );
 }
